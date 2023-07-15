@@ -72,6 +72,8 @@ MessagePromptTemplateT = TypeVar(
 
 
 class BaseStringMessagePromptTemplate(BaseMessagePromptTemplate, ABC):
+    # 传进来的模板变量是 PromptTemplate
+    # prompt.format()
     prompt: StringPromptTemplate
     additional_kwargs: dict = Field(default_factory=dict)
 
@@ -119,6 +121,7 @@ class ChatMessagePromptTemplate(BaseStringMessagePromptTemplate):
 
 class HumanMessagePromptTemplate(BaseStringMessagePromptTemplate):
     def format(self, **kwargs: Any) -> BaseMessage:
+        # prompt: 变量名，模板，模板解析方式，是否校验模板
         text = self.prompt.format(**kwargs)
         return HumanMessage(content=text, additional_kwargs=self.additional_kwargs)
 
@@ -161,6 +164,9 @@ class BaseChatPromptTemplate(BasePromptTemplate, ABC):
 
 
 class ChatPromptTemplate(BaseChatPromptTemplate, ABC):
+    # input_variables: ["style", "text"]
+    # messages: [HumanMessagePromptTemplate]
+
     input_variables: List[str]
     messages: List[Union[BaseMessagePromptTemplate, BaseMessage]]
 
@@ -187,6 +193,7 @@ class ChatPromptTemplate(BaseChatPromptTemplate, ABC):
     @classmethod
     def from_template(cls, template: str, **kwargs: Any) -> ChatPromptTemplate:
         prompt_template = PromptTemplate.from_template(template, **kwargs)
+        # 1. 包含了模板中的变量列表，模板字符串，模板解析格式和是否校验模板信息
         message = HumanMessagePromptTemplate(prompt=prompt_template)
         return cls.from_messages([message])
 
@@ -219,6 +226,7 @@ class ChatPromptTemplate(BaseChatPromptTemplate, ABC):
         input_vars = set()
         for message in messages:
             if isinstance(message, BaseMessagePromptTemplate):
+                # style， text
                 input_vars.update(message.input_variables)
         return cls(input_variables=list(input_vars), messages=messages)
 
@@ -226,12 +234,36 @@ class ChatPromptTemplate(BaseChatPromptTemplate, ABC):
         return self.format_prompt(**kwargs).to_string()
 
     def format_messages(self, **kwargs: Any) -> List[BaseMessage]:
+        # style=customer_style,
+        # text=customer_email
+        # kwargs = {"style": "", "text": ""}
+
+        """
+        阶段1： 解析模板：
+            1. 解析模板里边的变量
+            2. 指定模板解析的方式：f-string jinja2
+            3. 模板校验
+        阶段2： 负责填充模板
+            1. 将用户输入待填充的信息组装成k:v的形式传入
+            2. 判断是否为模板的message
+            3. 解析messageTemplate里边的变量，并获取用户传入信息对应变量的值，以k:v形式传递
+            4. 通过f-string或jinjia2方式替换模板变量中的值
+            5. HumanMessage格式(content, example, additional_kwargs) -> user输入信息
+            6. chatModels()
+        """
+        """ 为什么要在框架中支持模板的解析
+            1. 基于langchain的应用，对外提供服务时，用户只需要关注模板变量的内容，具体模板的定义在基于langchain的应用上提前定义，
+                增加灵活性。
+        """
+        # 合并除模板变量以外的变量
         kwargs = self._merge_partial_and_user_variables(**kwargs)
         result = []
         for message_template in self.messages:
+            # BaseMessage： 非模板的信息
             if isinstance(message_template, BaseMessage):
                 result.extend([message_template])
             elif isinstance(message_template, BaseMessagePromptTemplate):
+                # 只取模板需要的变量及值
                 rel_params = {
                     k: v
                     for k, v in kwargs.items()

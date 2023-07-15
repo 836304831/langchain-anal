@@ -31,9 +31,15 @@ class PromptTemplate(StringPromptTemplate):
             "template_format": self.template_format,
         }
 
+    # ["style", "text"]
     input_variables: List[str]
     """A list of the names of the variables the prompt template expects."""
 
+    """Translate the text \
+    that is delimited by triple backticks \
+    into a style that is {style}. \
+    text: ```{text}```
+    """
     template: str
     """The prompt template."""
 
@@ -64,6 +70,7 @@ class PromptTemplate(StringPromptTemplate):
             prompt.format(variable1="foo")
         """
         kwargs = self._merge_partial_and_user_variables(**kwargs)
+        # 根据模板类型，调用对应的模板填充工具进行填充
         return DEFAULT_FORMATTER_MAPPING[self.template_format](self.template, **kwargs)
 
     @root_validator()
