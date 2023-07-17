@@ -1,0 +1,49 @@
+[pydeps]
+verbose = 0
+pylib = False
+max_module_depth = 3
+
+max_bacon = 3
+start_color= 180
+
+exclude_exact =
+    langchain.utilities
+    langchain.utils
+    langchain.llms.utils
+
+exclude =
+    os
+    re
+    sys
+    collections
+    __future__
+    requests
+    urllib3
+    jinja2
+    yaml
+    langchain.prompts
+    langchain.base_language
+    langchain.schema
+    langchain.sql_database
+    langchain.docstore
+    langchain.vectorstores
+    langchain.cache
+    langchain.prompts
+    langchain.callbacks
+    langchain.agents
+    langchain.tools
+    langchain.memory
+    langchain.utilities
+    langchain.llms
+    langchain.output_parsers
+    langchain.utilities
+    langchain.chat_models
+    langchain.embeddings
+    langchain.graphs
+
+    langchain.load
+    langchain.text_splitter
+    langchain.input
+    langchain.requests
+
+
