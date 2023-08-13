@@ -3,7 +3,7 @@
 output_parsers是对聊天模型及其他模型输出结果的解析，因为理论上模型输出的结构都是字符串(如json格式的字符串),通过该模块可以将模型的输出按指定的格式输出，比如json格式，boolean格式，也可以是自定的类结构格式。这样做主要是为了方便与生成应用交互。比如所有的模型输出都通过该模块转换成类结构输出，那么上层应用就可以根据类结构获取对应的属性字段。类结构字段定义好之后，模型的调用和具体的上层应用就可以分离开，两者按定义好的中间数据层(类结构)独立开发，可以大大提升效率。
 
 ## output_parsers类介绍
-output_parsers模块下包含了多个类，这类都继承自BaseOutputParser，
+output_parsers模块下包含了多个类，这类都继承自BaseOutputParser，包含了解析类包括:
 - BooleanOutputParser: 将文本字符串解析为bool类型，该文本串需要是 'yes'或'no'，不区分大小写(会统一转化为大写字符判断)。
 - CombiningOutputParser: 组合了多个输出的解析器(list列表)，将文本通过'\n\n'分隔后，与解析器一一对应，分别调用对应的解析器解析输出结果。
 - DatetimeOutputParser: 将文本转成成datetime格式"%Y-%m-%dT%H:%M:%S.%fZ"。
